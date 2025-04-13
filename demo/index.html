@@ -1,17 +1,137 @@
+<!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" type="text/css" href="https://gitcdn.xyz/repo/pi0/clippyjs/master/assets/clippy.css" media="all">
+    <link rel="stylesheet" type="text/css" href="../assets/clippy.css" media="all">
     <style>
         html {
-            background: url('http://wallpapercave.com/wp/7VNksl0.jpg') no-repeat center center fixed;
+            background: url('https://wallpapercave.com/wp/7VNksl0.jpg') no-repeat center center fixed;
             -webkit-background-size: cover;
             -moz-background-size: cover;
             -o-background-size: cover;
             background-size: cover;
+            font-family: sans-serif;
         }
+        #log-container {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            width: 300px; /* Give log a width */
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 10000;
+            box-sizing: border-box;
+        }
+        /* --- New Control Panel Styles --- */
+        #control-panel {
+            position: fixed;
+            bottom: 10px;
+            left: 320px; /* Position next to log container */
+            background-color: rgba(255, 255, 255, 0.85);
+            color: black;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 200px; /* Match log container height */
+            width: 350px;
+            display: flex;
+            flex-direction: column;
+            z-index: 10000;
+            box-sizing: border-box;
+        }
+        #agent-selector {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
+        #agent-selector button {
+            padding: 5px 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #current-agent-name {
+            font-weight: bold;
+            text-align: center;
+            flex-grow: 1;
+            margin: 0 10px;
+        }
+        #speak-controls {
+            display: flex;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
+        #speak-input {
+            flex-grow: 1;
+            padding: 5px;
+            margin-right: 5px;
+        }
+        #speak-button {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        #animation-list-container {
+             overflow-y: auto; /* Make animation list scrollable */
+             flex-grow: 1; /* Allow list to take remaining space */
+        }
+        #animation-list-container h4 {
+            margin: 0 0 5px 0;
+            font-size: 14px;
+        }
+        #animation-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        #animation-list button {
+            background-color: #eee;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            padding: 3px 6px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+         #animation-list button:hover {
+             background-color: #ddd;
+         }
+        /* --- End Control Panel Styles --- */
     </style>
 </head>
 <body>
+<div id="log-container">Loading logs...<br></div>
+
+<!-- --- New Control Panel HTML --- -->
+<div id="control-panel">
+    <div id="agent-selector">
+        <button id="prev-agent">&lt;</button>
+        <span id="current-agent-name">Loading...</span>
+        <button id="next-agent">&gt;</button>
+    </div>
+    <div id="speak-controls">
+        <input type="text" id="speak-input" placeholder="Type here to speak...">
+        <button id="speak-button">Speak</button>
+    </div>
+    <div id="animation-list-container">
+         <h4>Animations:</h4>
+         <div id="animation-list">
+             <!-- Animation buttons will be added here by JS -->
+             <span>Load an agent to see animations.</span>
+         </div>
+    </div>
+</div>
+<!-- --- End Control Panel HTML --- -->
+
+
 <script src="https://unpkg.com/jquery@3.2.1"></script>
 <script src="https://unpkg.com/clippyjs@latest"></script>
 <script src="./demo.js"></script>
