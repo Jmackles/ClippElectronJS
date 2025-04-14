@@ -10,39 +10,74 @@
             -o-background-size: cover;
             background-size: cover;
             font-family: sans-serif;
+            height: 100%; /* Ensure html and body take full height */
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevent body scrollbars interfering with panel drag */
         }
-        #log-container {
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            position: relative; /* Needed for positioning panels */
+        }
+
+        /* --- Panel Base Styles --- */
+        .panel {
             position: fixed;
-            bottom: 10px;
-            left: 10px;
             background-color: rgba(0, 0, 0, 0.7);
             color: white;
-            padding: 10px;
             border-radius: 5px;
-            width: 300px; /* Give log a width */
-            max-height: 200px;
-            overflow-y: auto;
+            z-index: 10000;
+            box-sizing: border-box;
+            overflow: auto; /* Enable content scroll */
+            resize: both; /* Make panels resizable */
+            min-width: 200px; /* Prevent collapsing too small */
+            min-height: 100px;
+            display: flex; /* Use flexbox for header/content layout */
+            flex-direction: column;
+        }
+        .panel-header {
+            padding: 5px 10px;
+            background-color: rgba(50, 50, 50, 0.9);
+            cursor: move; /* Indicate draggable */
+            border-bottom: 1px solid #555;
+            flex-shrink: 0; /* Prevent header from shrinking */
+            user-select: none; /* Prevent text selection during drag */
+            font-weight: bold;
+        }
+        .panel-content {
+            padding: 10px;
+            flex-grow: 1; /* Allow content to fill space */
+            overflow-y: auto; /* Scroll content if needed */
+        }
+
+        #log-container {
+            bottom: 10px;
+            left: 10px;
+            width: 300px;
+            height: 200px;
             font-family: monospace;
             font-size: 12px;
-            z-index: 10000;
-            box-sizing: border-box;
         }
-        /* --- New Control Panel Styles --- */
+        #log-content { /* Specific content styling for log */
+             white-space: pre-wrap; /* Keep line breaks */
+        }
+
         #control-panel {
-            position: fixed;
             bottom: 10px;
             left: 320px; /* Position next to log container */
-            background-color: rgba(255, 255, 255, 0.85);
+            width: 450px; /* Wider for carousel */
+            height: 300px; /* Keep height */
+            background-color: rgba(220, 220, 220, 0.9); /* Lighter background */
             color: black;
-            padding: 15px;
-            border-radius: 5px;
-            max-height: 200px; /* Match log container height */
-            width: 350px;
-            display: flex;
-            flex-direction: column;
-            z-index: 10000;
-            box-sizing: border-box;
         }
+        #control-panel .panel-header {
+             background-color: rgba(180, 180, 180, 0.95);
+             border-bottom: 1px solid #aaa;
+        }
+
+        /* --- Agent Carousel Styles --- */
         #agent-selector {
             display: flex;
             align-items: center;
@@ -55,38 +90,92 @@
             padding: 5px 10px;
             font-size: 16px;
             cursor: pointer;
+            flex-shrink: 0;
         }
-        #current-agent-name {
-            font-weight: bold;
-            text-align: center;
+        #agent-carousel {
+            display: flex;
+            justify-content: center; /* Center the slots */
+            align-items: center;
+            gap: 10px; /* Space between slots */
+            overflow: visible; /* Allow larger sprites to overflow visually if needed */
             flex-grow: 1;
             margin: 0 10px;
+            min-height: 140px; /* Keep increased height */
+            padding: 5px 0; /* Keep padding */
         }
+        .agent-slot {
+            /* width: 100px; */ /* REMOVED fixed size */
+            /* height: 100px; */ /* REMOVED fixed size */
+            /* Size will be set dynamically by JS */
+            display: flex; /* Use flex to help center inner content */
+            align-items: center; /* Center vertically */
+            justify-content: center; /* Center horizontally */
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: border-color 0.2s ease, width 0.2s ease, height 0.2s ease; /* Added size transition */
+            flex-shrink: 0;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            background-color: transparent;
+        }
+        .sprite-crop {
+            /* Dimensions, background-image, background-position set by JS */
+            background-size: auto;
+            background-repeat: no-repeat;
+            /* Position is now relative to the flex container */
+            /* position: absolute; */ /* REMOVED absolute */
+            /* top: 50%; */ /* REMOVED */
+            /* left: 50%; */ /* REMOVED */
+            /* transform: translate(-50%, -50%); */ /* REMOVED */
+            image-rendering: pixelated;
+            flex-shrink: 0; /* Prevent inner div from shrinking */
+        }
+        .agent-slot.selected {
+            border-color: #007bff; /* Highlight selected agent */
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.7);
+        }
+        .agent-slot:hover {
+            border-color: #aaa;
+        }
+
+        /* --- Speak Controls --- */
         #speak-controls {
             display: flex;
             margin-bottom: 10px;
             border-bottom: 1px solid #ccc;
             padding-bottom: 10px;
+            flex-shrink: 0; /* Prevent shrinking */
         }
         #speak-input {
             flex-grow: 1;
             padding: 5px;
             margin-right: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
         }
         #speak-button {
             padding: 5px 10px;
             cursor: pointer;
+            border: 1px solid #ccc;
+            background-color: #eee;
+            border-radius: 3px;
         }
+         #speak-button:hover {
+             background-color: #ddd;
+         }
+
+        /* --- Animation List --- */
         #animation-list-container {
              overflow-y: auto; /* Make animation list scrollable */
              flex-grow: 1; /* Allow list to take remaining space */
+             min-height: 50px; /* Ensure some space */
         }
         #animation-list-container h4 {
             margin: 0 0 5px 0;
             font-size: 14px;
         }
         #animation-list {
-            list-style: none;
             padding: 0;
             margin: 0;
             display: flex;
@@ -104,36 +193,144 @@
          #animation-list button:hover {
              background-color: #ddd;
          }
-        /* --- End Control Panel Styles --- */
+
+        /* --- Preview Adjuster Panel Styles --- */
+        #preview-adjuster {
+            bottom: 10px;
+            left: 780px; /* Position next to control panel */
+            width: 400px; /* Wider for sprite sheet */
+            height: 450px; /* Taller */
+            background-color: rgba(200, 220, 200, 0.9);
+            color: black;
+            display: flex; /* Use flex for layout */
+            flex-direction: column;
+        }
+        #preview-adjuster .panel-header {
+             background-color: rgba(160, 180, 160, 0.95);
+             border-bottom: 1px solid #8a8;
+        }
+        #preview-adjuster .panel-content {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            overflow: hidden; /* Prevent content overflow */
+        }
+        #adjuster-agent-name {
+             font-weight: bold;
+             margin-bottom: 5px;
+             flex-shrink: 0;
+        }
+        #sprite-preview-container {
+            position: relative; /* Crucial for crop box positioning */
+            width: fit-content; /* Adjust to image size */
+            max-width: 100%; /* Prevent overflow */
+            height: 200px; /* Fixed height for container */
+            overflow: auto; /* Scroll if sprite sheet is larger */
+            border: 1px solid #999;
+            background: #555; /* Darker background to see sprite */
+            margin-bottom: 10px;
+            flex-shrink: 0;
+        }
+        #sprite-sheet {
+            display: block;
+            max-width: none; /* Allow image to be its original size */
+            max-height: none;
+            user-select: none; /* Prevent image drag selection */
+            pointer-events: none; /* Prevent image interaction */
+        }
+        #crop-box {
+            position: absolute;
+            border: 1px dashed red;
+            cursor: move;
+            resize: both; /* Enable native resize handles */
+            overflow: hidden; /* Needed for resize property */
+            box-sizing: border-box;
+            /* Size and position set by JS */
+            min-width: 10px; /* Prevent collapsing */
+            min-height: 10px;
+        }
+        #adjuster-values {
+            font-family: monospace;
+            font-size: 12px;
+            margin-bottom: 10px;
+            flex-shrink: 0;
+        }
+        #adjuster-buttons {
+            margin-top: auto; /* Push buttons to bottom */
+            padding-top: 10px;
+            border-top: 1px solid #ccc;
+            flex-shrink: 0;
+        }
+         #adjuster-buttons button {
+             margin-right: 10px;
+             padding: 5px 10px;
+             cursor: pointer;
+         }
+
     </style>
 </head>
 <body>
-<div id="log-container">Loading logs...<br></div>
+<!-- Log Container -->
+<div id="log-container" class="panel">
+    <div class="panel-header" id="log-header">Logs</div>
+    <div class="panel-content" id="log-content">Loading logs...<br></div>
+</div>
 
-<!-- --- New Control Panel HTML --- -->
-<div id="control-panel">
-    <div id="agent-selector">
-        <button id="prev-agent">&lt;</button>
-        <span id="current-agent-name">Loading...</span>
-        <button id="next-agent">&gt;</button>
-    </div>
-    <div id="speak-controls">
-        <input type="text" id="speak-input" placeholder="Type here to speak...">
-        <button id="speak-button">Speak</button>
-    </div>
-    <div id="animation-list-container">
-         <h4>Animations:</h4>
-         <div id="animation-list">
-             <!-- Animation buttons will be added here by JS -->
-             <span>Load an agent to see animations.</span>
-         </div>
+<!-- Control Panel -->
+<div id="control-panel" class="panel">
+    <div class="panel-header" id="control-panel-header">Controls</div>
+    <div class="panel-content">
+        <div id="agent-selector">
+            <button id="rotate-left">&lt;</button>
+            <div id="agent-carousel">
+                <!-- Agent slots will be added here by JS -->
+            </div>
+            <button id="rotate-right">&gt;</button>
+        </div>
+        <div id="speak-controls">
+            <input type="text" id="speak-input" placeholder="Type here to speak...">
+            <button id="speak-button">Speak</button>
+        </div>
+        <div id="animation-list-container">
+             <h4>Animations:</h4>
+             <div id="animation-list">
+                 <!-- Animation buttons will be added here by JS -->
+                 <span>Load an agent to see animations.</span>
+             </div>
+        </div>
     </div>
 </div>
 <!-- --- End Control Panel HTML --- -->
 
+<!-- Preview Adjuster Panel -->
+<div id="preview-adjuster" class="panel">
+    <div class="panel-header" id="adjuster-header">Preview Adjuster</div>
+    <div class="panel-content">
+        <div id="adjuster-agent-name">No agent selected</div>
+        <div id="sprite-preview-container">
+            <!-- Image source set by JS -->
+            <img id="sprite-sheet" src="" alt="Sprite Sheet Preview" />
+            <!-- Crop box position/size set by JS -->
+            <div id="crop-box"></div>
+        </div>
+        <div id="adjuster-values">
+            X: <span id="val-x">0</span>, Y: <span id="val-y">0</span>,
+            W: <span id="val-w">0</span>, H: <span id="val-h">0</span>
+        </div>
+        <div id="adjuster-buttons">
+             <button id="log-adjuster-values">Log Current Values</button>
+             <button id="save-settings">Save All Settings</button>
+             <button id="load-settings">Load Settings</button>
+             <button id="reset-settings">Reset All (Default)</button>
+        </div>
+    </div>
+</div>
+<!-- --- End Preview Adjuster Panel --- -->
+
 
 <script src="https://unpkg.com/jquery@3.2.1"></script>
-<script src="https://unpkg.com/clippyjs@latest"></script>
+<!-- Use local build - Make sure you run 'npm run build' first -->
+<script src="../dist/clippy.js"></script>
 <script src="./demo.js"></script>
 </body>
 </html>
